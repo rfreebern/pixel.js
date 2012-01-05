@@ -1,0 +1,138 @@
+<html>
+
+<head>
+    <title>pixel.js tests</title>
+    <script type="text/javascript" lang="JavaScript" src="pixel.js"></script>
+    <script type="text/javascript" lang="JavaScript">
+        var details = {};
+        function assert (test, condition, description) {
+            if (condition) {
+                return '.';
+            } else {
+                details[test] = description;
+                return 'F';
+            }
+        }
+
+        var tests = {
+            testNew: function () {
+                var p = new Pixel();
+                var mock = { cacheSourceData: true, cache: [] };
+                return assert('testNew', JSON.stringify(p) == JSON.stringify(mock), "New Pixel instance does not look as expected.");
+            },
+            testInit: function () {
+                var p = new Pixel({ red: 12, green: 34, blue: 56, alpha: 255 });
+                return assert('testInit', p.red == 12 && p.green == 34 && p.blue == 56 && p.alpha == 255, "Values initialized improperly.");
+            },
+            testYUV: function () {
+                var p = new Pixel({ red: 112, blue: 96, green: 189}).YUV();
+                return assert('testYUV', p.luma == 155 && p.u == 94 && p.v == 97, "YUV calculated improperly.");
+            },
+            testRGB: function () {
+                var p = new Pixel({ luma: 204, u: 31, v: 119 }).RGB();
+                return assert('testRGB', p.red == 191 && p.green == 244 && p.blue == 31, "RGB calculated improperly." + JSON.stringify(p));
+            },
+            testEuclideanDistance: function () {
+                return (
+                    assert('testEuclideanDistance1',
+                        new Pixel({ red: 17, green: 224, blue: 191}).euclideanDistance(new Pixel({ red: 17, green: 255, blue: 194 })) == 15.264337522473747,
+                        "Euclidean distance calculated improperly.")
+                    &&
+                    assert('testEuclideanDistance2',
+                        new Pixel({ red: 0, green: 0, blue: 0 }).euclideanDistance(new Pixel({ red: 0, green: 0, blue: 0 })) == 0,
+                        "Euclidean distance calculated improperly.")
+                    &&
+                    assert('testEuclideanDistance3',
+                        new Pixel({ red: 0, green: 0, blue: 0 }).euclideanDistance(new Pixel({ red: 255, green: 255, blue: 255 })) == 0,
+                        "Euclidean distance calculated improperly.")
+                );
+            },
+            testHex: function () {
+                return assert('testHex', new Pixel({ red: 255, green: 0, blue: 128, alpha: 0}).hex() == '#ff008000', "Incorrect hex color code.");
+            },
+            testShortHex: function () {
+                return assert('testShortHex', new Pixel({ red: 255, green: 255, blue: 0 }).shortHex() == '#ff0', "Incorrect short hex color code.");
+            },
+            testReadData: function () {
+                var i = document.getElementById('testImage');
+                var p = new Pixel({ source: i, x: 0, y: 0 }).readData();
+                return assert('testReadData', p.red == 0 && p.green == 0 && p.blue == 0 && p.alpha == 255, "Read data incorrectly.");
+            },
+            testReadDataCached: function () {
+                var i = document.getElementById('testImage');
+                var p = new Pixel({ source: i, x: 0, y: 0 }).readData();
+                return assert('testReadDataCached', p.cache.length == 1600, "Cache length is not what was expected.");
+            },
+            testReadDataUncached: function () {
+                var i = document.getElementById('testImage');
+                var p = new Pixel({ source: i, x: 0, y: 0, cacheSourceData: false }).readData();
+                return assert('testReadDataUncached', p.cache.length == 0, "Cache length is not what was expected.");
+            },
+            testGetPixel: function () {
+                var i = document.getElementById('testImage');
+                var p1 = i.getPixel(0, 0);
+                var p2 = new Pixel({ source: i, x: 0, y: 0 }).readData();
+                return assert('testGetPixel', JSON.stringify(p1) == JSON.stringify(p2), "Pixels are not identical.");
+            },
+            testNext: function () {
+                var i = document.getElementById('testImage');
+                var p = i.getPixel(0, 0).next();
+                var f = i.getPixel(19, 19).next();
+                return assert('testNext', p.x == 1 && p.y == 0 && !f, "Pixels fetched are not what was expected.");
+            },
+            testAbove: function () {
+                var i = document.getElementById('testImage');
+                var p = i.getPixel(0, 1).above();
+                var f = i.getPixel(0, 0).above();
+                return assert('testAbove', p.x == 0 && p.y == 0 && !f, "Pixels fetched are not what was expected.");
+            },
+            testBelow: function () {
+                var i = document.getElementById('testImage');
+                var p = i.getPixel(0, 0).below();
+                var f = i.getPixel(0, 19).below();
+                return assert('testBelow', p.x == 0 && p.y == 1 && !f, "Pixels fetched are not what was expected.");
+            },
+            testLeft: function () {
+                var i = document.getElementById('testImage');
+                var p = i.getPixel(1, 0).left();
+                var f = i.getPixel(0, 0).left();
+                return assert('testLeft', p.x == 0 && p.y == 0 && !f, "Pixels fetched are not what was expected.");
+            },
+            testRight: function () {
+                var i = document.getElementById('testImage');
+                var p = i.getPixel(0, 0).right();
+                var f = i.getPixel(19, 0).right();
+                return assert('testBelow', p.x == 1 && p.y == 0 && !f, "Pixels fetched are not what was expected.");
+            },
+        };
+        window.onload = function () {
+            var results = document.getElementById('results');
+            var resultString = '';
+            for (test in tests) {
+                if (tests.hasOwnProperty(test)) {
+                    resultString += tests[test]();
+                    results.innerHTML = resultString;
+                }
+            }
+            resultString += "\n";
+            var failures = 0;
+            for (test in details) {
+                if (details.hasOwnProperty(test)) {
+                    failures++;
+                    resultString += test + ': ' + details[test] + "\n";
+                    results.innerHTML = resultString;
+                }
+            }
+            if (!failures) {
+                resultString += "All tests passed.";
+                results.innerHTML = resultString;
+            }
+        };
+    </script>
+</head>
+<body>
+<h1>pixel.js tests</h1>
+<img id="testImage" width="20" height="20" title="Test image" alt="Test image" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAAIElEQVQ4y2NgwAv%2B40UMo5pHNROhGZ8C%2FGBU86hmgpoBa%2F%2FyHLnDWNEAAAAASUVORK5CYII%3D" />
+<div><pre id="results"></pre></div>
+</body>
+</html>
