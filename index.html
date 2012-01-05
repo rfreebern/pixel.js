@@ -71,23 +71,23 @@
             },
             testReadData: function () {
                 var i = document.getElementById('testImage');
-                var p = new Pixel({ source: i, x: 0, y: 0 }).readData();
+                var p = new Pixel({ element: i, x: 0, y: 0 }).readData();
                 return assert('testReadData', p.red == 0 && p.green == 0 && p.blue == 0 && p.alpha == 255, "Read data incorrectly.");
             },
             testReadDataCached: function () {
                 var i = document.getElementById('testImage');
-                var p = new Pixel({ source: i, x: 0, y: 0 }).readData();
+                var p = new Pixel({ element: i, x: 0, y: 0 }).readData();
                 return assert('testReadDataCached', p.cache.length == 1600, "Cache length is not what was expected.");
             },
             testReadDataUncached: function () {
                 var i = document.getElementById('testImage');
-                var p = new Pixel({ source: i, x: 0, y: 0, cacheSourceData: false }).readData();
+                var p = new Pixel({ element: i, x: 0, y: 0, cacheSourceData: false }).readData();
                 return assert('testReadDataUncached', p.cache.length == 0, "Cache length is not what was expected.");
             },
             testGetPixel: function () {
                 var i = document.getElementById('testImage');
                 var p1 = i.getPixel(0, 0);
-                var p2 = new Pixel({ source: i, x: 0, y: 0 }).readData();
+                var p2 = new Pixel({ element: i, x: 0, y: 0 }).readData();
                 return assert('testGetPixel', JSON.stringify(p1) == JSON.stringify(p2), "Pixels are not identical.");
             },
             testNext: function () {

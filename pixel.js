@@ -9,7 +9,7 @@
     };
 
     var defaults = {
-        source:          undefined,
+        element:         undefined,
         x:               undefined,
         y:               undefined,
         red:             undefined,
@@ -37,18 +37,18 @@
         if (options === undefined) {
             options = {};
         }
-        this.source =          options.source;
-        this.x      =          options.x;
-        this.y      =          options.y;
-        this.red    =          options.red;
-        this.green  =          options.green;
-        this.blue   =          options.blue;
-        this.alpha  =          options.alpha;
-        this.luma   =          options.luma;
-        this.u      =          options.u;
-        this.v      =          options.v;
+        this.element =         options.element;
+        this.x       =         options.x;
+        this.y       =         options.y;
+        this.red     =         options.red;
+        this.green   =         options.green;
+        this.blue    =         options.blue;
+        this.alpha   =         options.alpha;
+        this.luma    =         options.luma;
+        this.u       =         options.u;
+        this.v       =         options.v;
         this.cacheSourceData = options.cacheSourceData;
-        this.cache  =          options.cache;
+        this.cache   =         options.cache;
         return this;
     };
 
@@ -60,14 +60,14 @@
     };
 
     HTMLElement.prototype.getPixel = function (x, y) {
-        return new Pixel({ source: this, x: x, y: y }).readData();
+        return new Pixel({ element: this, x: x, y: y }).readData();
     };
 
     Pixel.prototype.next = function () {
-        if (this.x == this.source.width - 1 && this.y == this.source.height - 1) {
+        if (this.x == this.element.width - 1 && this.y == this.element.height - 1) {
             return false;
         }
-        if (this.x == this.source.width - 1) {
+        if (this.x == this.element.width - 1) {
             this.y++;
             this.x = -1;
         }
@@ -80,7 +80,7 @@
     };
 
     Pixel.prototype.below = function () {
-        return (this.y++ == this.source.height - 1 ? false : this.readData());
+        return (this.y++ == this.element.height - 1 ? false : this.readData());
     };
 
     Pixel.prototype.left = function () {
@@ -88,11 +88,11 @@
     };
 
     Pixel.prototype.right = function () {
-        return (this.x++ == this.source.width - 1 ? false : this.readData());
+        return (this.x++ == this.element.width - 1 ? false : this.readData());
     };
 
     Pixel.prototype.readData = function () {
-        if (this.source === undefined || !this.source.isElement()) {
+        if (this.element === undefined || !this.element.isElement()) {
             throw new TypeError("Invalid source element.");
             return false;
         }
@@ -104,26 +104,26 @@
             throw new TypeError("Y coordinate should be a number.");
             return false;
         }
-        if (this.x >= this.source.width || this.x < 0) {
-            throw new RangeError("X coordinate " + this.x + " is outside source (" + this.source.width + "px)");
+        if (this.x >= this.element.width || this.x < 0) {
+            throw new RangeError("X coordinate " + this.x + " is outside source (" + this.element.width + "px)");
             return false;
-        } else if (this.y >= this.source.height || this.y < 0) {
-            throw new RangeError("Y coordinate " + this.y + " is outside source (" + this.source.height + "px)");
+        } else if (this.y >= this.element.height || this.y < 0) {
+            throw new RangeError("Y coordinate " + this.y + " is outside source (" + this.element.height + "px)");
             return false;
         }
         var data = this.cache;
-        var position = this.y * this.source.width * 4 + this.x * 4;
+        var position = this.y * this.element.width * 4 + this.x * 4;
         if (!this.cacheSourceData || data.length === 0) {
             var canvas   = document.createElement('canvas');
             var context  = canvas.getContext('2d');
             if (this.cacheSourceData) {
-                canvas.width = this.source.width;
-                canvas.height = this.source.height;
-                context.drawImage(this.source, 0, 0);
-                data = this.cache = context.getImageData(0, 0, this.source.width, this.source.height).data;
+                canvas.width = this.element.width;
+                canvas.height = this.element.height;
+                context.drawImage(this.element, 0, 0);
+                data = this.cache = context.getImageData(0, 0, this.element.width, this.element.height).data;
             } else {
                 canvas.width = canvas.height = 1;
-                context.drawImage(this.source, this.x, this.y, 1, 1);
+                context.drawImage(this.element, this.x, this.y, 1, 1);
                 data = context.getImageData(0, 0, 1, 1).data;
                 position = 0;
             }
