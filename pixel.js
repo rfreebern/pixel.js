@@ -60,8 +60,7 @@
     };
 
     HTMLElement.prototype.getPixel = function (x, y) {
-        var self = this;
-        return new Pixel({ source: self, x: x, y: y }).readData();
+        return new Pixel({ source: this, x: x, y: y }).readData();
     };
 
     Pixel.prototype.next = function () {
