@@ -48,10 +48,26 @@
                 );
             },
             testHex: function () {
-                return assert('testHex', new Pixel({ red: 255, green: 0, blue: 128, alpha: 0}).hex() == '#ff008000', "Incorrect hex color code.");
+                return (
+                    assert('testHexWithAlpha',
+                        new Pixel({ red: 255, green: 0, blue: 128, alpha: 255}).hex() == '#ff0080',
+                        "Incorrect hex color code.")
+                    &&
+                    assert('testHexNoAlpha',
+                        new Pixel({ red: 128, green: 128, blue: 0 }).hex() == '#808000',
+                        "Incorrect hex color code.")
+                );
             },
             testShortHex: function () {
-                return assert('testShortHex', new Pixel({ red: 255, green: 255, blue: 0 }).shortHex() == '#ff0', "Incorrect short hex color code.");
+                return (
+                    assert('testShortHexWithAlpha',
+                        new Pixel({ red: 255, green: 255, blue: 0, alpha: 128 }).shortHex() == '#ff0',
+                        "Incorrect short hex color code.")
+                    &&
+                    assert('testShortHexNoAlpha',
+                        new Pixel({ red: 0, green: 255, blue: 0 }).shortHex() == '#0f0',
+                        "Incorrect short hex color code.")
+                );
             },
             testReadData: function () {
                 var i = document.getElementById('testImage');
