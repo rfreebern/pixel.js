@@ -70,43 +70,26 @@
         }
         if (this.x == this.source.width - 1) {
             this.y++;
-            this.x = 0;
-            return this.readData();
+            this.x = -1;
         }
         this.x++;
         return this.readData();
     };
 
     Pixel.prototype.above = function () {
-        if (this.y == 0) {
-            return false;
-        }
-        this.y--;
-        return this.readData();
+        return (this.y-- == 0 ? false : this.readData());
     };
 
     Pixel.prototype.below = function () {
-        if (this.y == this.source.height - 1) {
-            return false;
-        }
-        this.y++;
-        return this.readData();
+        return (this.y++ == this.source.height - 1 ? false : this.readData());
     };
 
     Pixel.prototype.left = function () {
-        if (this.x == 0) {
-            return false;
-        }
-        this.x--;
-        return this.readData();
+        return (this.x-- == 0 ? false : this.readData());
     };
 
     Pixel.prototype.right = function () {
-        if (this.x == this.source.width - 1) {
-            return false;
-        }
-        this.x++;
-        return this.readData();
+        return (this.x++ == this.source.width - 1 ? false : this.readData());
     };
 
     Pixel.prototype.readData = function () {
@@ -131,7 +114,7 @@
         }
         var data = this.cache;
         var position = this.y * this.source.width * 4 + this.x * 4;
-        if (!this.cacheSourceData || (this.cacheSourceData && this.cache.length === 0)) {
+        if (!this.cacheSourceData || data.length === 0) {
             var canvas   = document.createElement('canvas');
             var context  = canvas.getContext('2d');
             if (this.cacheSourceData) {
@@ -195,11 +178,7 @@
     }
 
     Pixel.prototype.hex = function () {
-        var hex = "#" + pad(this.red.toString(16)) + pad(this.green.toString(16)) + pad(this.blue.toString(16));
-        if (this.alpha !== undefined) {
-            hex += pad(this.alpha.toString(16));
-        }
-        return hex;
+        return "#" + pad(this.red.toString(16)) + pad(this.green.toString(16)) + pad(this.blue.toString(16));
     };
 
     function truncate (number) {
@@ -207,11 +186,7 @@
     }
 
     Pixel.prototype.shortHex = function () {
-        var hex = "#" + truncate(this.red.toString(16)) + truncate(this.green.toString(16)) + truncate(this.blue.toString(16));
-        if (this.alpha !== undefined) {
-            hex += truncate(this.alpha.toString(16));
-        }
-        return hex;
+        return "#" + truncate(this.red.toString(16)) + truncate(this.green.toString(16)) + truncate(this.blue.toString(16));
     };
 
     window.Pixel = Pixel;
