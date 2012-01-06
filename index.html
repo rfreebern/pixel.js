@@ -17,7 +17,7 @@
         var tests = {
             testNew: function () {
                 var p = new Pixel();
-                var mock = { cacheSourceData: true, cache: [] };
+                var mock = { cacheImageData: true, cache: [] };
                 return assert('testNew', JSON.stringify(p) == JSON.stringify(mock), "New Pixel instance does not look as expected.");
             },
             testInit: function () {
@@ -81,7 +81,7 @@
             },
             testReadDataUncached: function () {
                 var i = document.getElementById('testImage');
-                var p = new Pixel({ element: i, x: 0, y: 0, cacheSourceData: false }).readData();
+                var p = new Pixel({ element: i, x: 0, y: 0, cacheImageData: false }).readData();
                 return assert('testReadDataUncached', p.cache.length == 0, "Cache length is not what was expected.");
             },
             testGetPixel: function () {
@@ -119,6 +119,21 @@
                 var p = i.getPixel(0, 0).right();
                 var f = i.getPixel(19, 0).right();
                 return assert('testBelow', p.x == 1 && p.y == 0 && !f, "Pixels fetched are not what was expected.");
+            },
+            testWriteData: function () {
+                var c = document.createElement('canvas');
+                c.width = c.height = 1;
+                var p = new Pixel({ element: c, x: 0, y: 0, red: 255, green: 128 });
+                p.writeData();
+                var p2 = c.getPixel(0, 0);
+                return assert('testWriteData', p.x == 0 && p.y == 0 && p.red == 255 && p.green == 128, "Pixel fetched is not what was written.");
+            },
+            testPutPixel: function () {
+                var c = document.createElement('canvas');
+                c.width = c.height = 1;
+                c.putPixel(new Pixel({ x: 0, y: 0, red: 255, alpha: 255 }));
+                var p = c.getPixel(0, 0);
+                return assert('testPutPixel', p.x == 0 && p.y == 0 && p.red == 255 && p.alpha == 255, "Pixel fetched is not what was put."+JSON.stringify(p));
             },
         };
         window.onload = function () {
