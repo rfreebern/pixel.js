@@ -9,18 +9,18 @@
     };
 
     var defaults = {
-        element:         undefined,
-        x:               undefined,
-        y:               undefined,
-        red:             undefined,
-        green:           undefined,
-        blue:            undefined,
-        alpha:           undefined,
-        luma:            undefined,
-        u:               undefined,
-        v:               undefined,
-        cacheSourceData: true,
-        cache:           []
+        element:        undefined,
+        x:              undefined,
+        y:              undefined,
+        red:            undefined,
+        green:          undefined,
+        blue:           undefined,
+        alpha:          undefined,
+        luma:           undefined,
+        u:              undefined,
+        v:              undefined,
+        cacheImageData: true,
+        cache:          []
     };
 
     function merge (obj) {
@@ -37,18 +37,18 @@
         if (options === undefined) {
             options = {};
         }
-        this.element =         options.element;
-        this.x       =         options.x;
-        this.y       =         options.y;
-        this.red     =         options.red;
-        this.green   =         options.green;
-        this.blue    =         options.blue;
-        this.alpha   =         options.alpha;
-        this.luma    =         options.luma;
-        this.u       =         options.u;
-        this.v       =         options.v;
-        this.cacheSourceData = options.cacheSourceData;
-        this.cache   =         options.cache;
+        this.element =        options.element;
+        this.x       =        options.x;
+        this.y       =        options.y;
+        this.red     =        options.red;
+        this.green   =        options.green;
+        this.blue    =        options.blue;
+        this.alpha   =        options.alpha;
+        this.luma    =        options.luma;
+        this.u       =        options.u;
+        this.v       =        options.v;
+        this.cacheImageData = options.cacheImageData;
+        this.cache   =        options.cache;
         return this;
     };
 
@@ -61,6 +61,11 @@
 
     HTMLElement.prototype.getPixel = function (x, y) {
         return new Pixel({ element: this, x: x, y: y }).readData();
+    };
+
+    HTMLCanvasElement.prototype.putPixel = function (p) {
+        p.element = this;
+        return p.writeData();
     };
 
     Pixel.prototype.next = function () {
@@ -94,29 +99,24 @@
     Pixel.prototype.readData = function () {
         if (this.element === undefined || !this.element.isElement()) {
             throw new TypeError("Invalid source element.");
-            return false;
         }
         if (this.x === undefined || isNaN(this.x)) {
             throw new TypeError("X coordinate should be a number.");
-            return false;
         }
         if (this.y === undefined || isNaN(this.y)) {
             throw new TypeError("Y coordinate should be a number.");
-            return false;
         }
         if (this.x >= this.element.width || this.x < 0) {
             throw new RangeError("X coordinate " + this.x + " is outside source (" + this.element.width + "px)");
-            return false;
         } else if (this.y >= this.element.height || this.y < 0) {
             throw new RangeError("Y coordinate " + this.y + " is outside source (" + this.element.height + "px)");
-            return false;
         }
         var data = this.cache;
         var position = this.y * this.element.width * 4 + this.x * 4;
-        if (!this.cacheSourceData || data.length === 0) {
+        if (!this.cacheImageData || !data.length) {
             var canvas   = document.createElement('canvas');
             var context  = canvas.getContext('2d');
-            if (this.cacheSourceData) {
+            if (this.cacheImageData) {
                 canvas.width = this.element.width;
                 canvas.height = this.element.height;
                 context.drawImage(this.element, 0, 0);
@@ -135,10 +135,35 @@
         return this;
     };
 
+    Pixel.prototype.writeData = function () {
+        if (this.element === undefined || !this.element.isElement() || !(this.element instanceof HTMLCanvasElement)) {
+            throw new TypeError("Invalid destination element.");
+        }
+        if (this.x === undefined || isNaN(this.x)) {
+            throw new TypeError("X coordinate should be a number.");
+        }
+        if (this.y === undefined || isNaN(this.y)) {
+            throw new TypeError("Y coordinate should be a number.");
+        }
+        if (this.x >= this.element.width || this.x < 0) {
+            throw new RangeError("X coordinate " + this.x + " is outside destination (" + this.element.width + "px)");
+        } else if (this.y >= this.element.height || this.y < 0) {
+            throw new RangeError("Y coordinate " + this.y + " is outside destination (" + this.element.height + "px)");
+        }
+        
+        var context = this.element.getContext('2d');
+        var data = context.createImageData(1, 1);
+        data.data[0] = this.red;
+        data.data[1] = this.green;
+        data.data[2] = this.blue;
+        data.data[3] = this.alpha;
+        context.putImageData(data, this.x, this.y);
+        return this;
+    };
+
     Pixel.prototype.YUV = function () {
         if (this.red === undefined || this.green === undefined || this.blue === undefined) {
             throw new Error("No RGB color data to convert to YUV.");
-            return false;
         }
         this.luma = Math.round(this.red * 0.299 + this.green * 0.587 + this.blue * 0.114);
         this.u = Math.round(this.red * -0.168736 + this.green * -0.331264 + this.blue * 0.5 + 128);
@@ -155,7 +180,6 @@
     Pixel.prototype.RGB = function () {
         if (this.luma === undefined || this.u === undefined || this.v === undefined) {
             throw new Error("No YUV color data to convert to RGB.");
-            return false;
         }
         var vd = this.v - 128;
         var ud = this.u - 128;
