@@ -2,10 +2,11 @@
     "use strict";
     
     var Pixel = function (options) {
-        if (!this.init) {
+        if (!this) {
             return new Pixel(options);
         }
-        return this.init(merge(options || {}, defaults));
+
+        return merge(this, options || {}, defaults);
     };
 
     var defaults = {
@@ -33,25 +34,6 @@
         return obj;
     }
     
-    Pixel.prototype.init = function (options) {
-        if (options === undefined) {
-            options = {};
-        }
-        this.element =        options.element;
-        this.x       =        options.x;
-        this.y       =        options.y;
-        this.red     =        options.red;
-        this.green   =        options.green;
-        this.blue    =        options.blue;
-        this.alpha   =        options.alpha;
-        this.luma    =        options.luma;
-        this.u       =        options.u;
-        this.v       =        options.v;
-        this.cacheImageData = options.cacheImageData;
-        this.cache   =        options.cache;
-        return this;
-    };
-
     Object.prototype.isElement = function () {
         return (
             typeof HTMLElement === "object" ? this instanceof HTMLElement :
